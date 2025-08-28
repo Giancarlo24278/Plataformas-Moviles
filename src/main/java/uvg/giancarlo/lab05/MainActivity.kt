@@ -256,5 +256,5 @@ fun PantallaPrincipal(modifier: Modifier = Modifier) {
         }
     }
 
-
+//
 
