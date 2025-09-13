@@ -1,0 +1,275 @@
+package uvg.giancarlo.lab08
+
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.sp
+import uvg.giancarlo.lab08.R
+import uvg.giancarlo.lab08.ui.theme.Lab08Theme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            Lab08Theme {
+                var currentScreen by remember { mutableStateOf("inicio") }
+                var selectedPersona by remember { mutableStateOf("") }
+
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    when (currentScreen) {
+                        "inicio" -> Inicio(
+                            modifier = Modifier.padding(innerPadding),
+                            onNavigateToPersonas = { currentScreen = "personas" }
+                        )
+                        "personas" -> PersonasList(
+                            modifier = Modifier.padding(innerPadding),
+                            onPersonaClick = { persona ->
+                                selectedPersona = persona
+                                currentScreen = "perfil"
+                            }
+                        )
+                        "perfil" -> Perfil(
+                            modifier = Modifier.padding(innerPadding),
+                            personaName = selectedPersona
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Inicio(modifier: Modifier = Modifier, onNavigateToPersonas: () -> Unit) {
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ){
+
+        Spacer(modifier = Modifier.weight(0.8f))
+
+        Image(
+            painter = painterResource(id = R.drawable.rym_logoo),
+            contentDescription = "RyM Logoo",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        )
+
+        Button(
+            onClick = { onNavigateToPersonas() },
+            modifier = Modifier
+                .width(250.dp)
+                .height(60.dp),
+            shape = RoundedCornerShape(0.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF765AE5),
+                contentColor = Color.White
+            )
+        )
+        {
+            Text("Entrar")
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Giancarlo Sagastume 24278",
+                fontSize = 16.sp,
+                color = Color.Gray
+            )
+        }
+    }
+}
+
+@Composable
+fun PersonasList(
+    modifier: Modifier = Modifier,
+    onPersonaClick: (String) -> Unit
+) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize().padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(Personas) { persona ->
+            Personas(
+                imageRes = getImageForPersona(persona),
+                name = persona,
+                onPersonaClick = { onPersonaClick(persona) }
+            )
+        }
+    }
+}
+
+fun getImageForPersona(name: String): Int {
+    return when {
+        name.contains("Rick", ignoreCase = true) -> R.drawable.rick
+        name.contains("Summer", ignoreCase = true) -> R.drawable.summer
+        name.contains("Beth", ignoreCase = true) -> R.drawable.beth
+        name.contains("Jerry", ignoreCase = true) -> R.drawable.jerry
+        name.contains("Morty", ignoreCase = true) -> R.drawable.morty
+        name.contains("Alien", ignoreCase = true) -> R.drawable.abadango
+        else -> R.drawable.rick
+    }
+}
+
+//---------------------------------------
+//pantalla de persoans
+@Composable
+fun Personas(
+    imageRes: Int,
+    name: String,
+    onPersonaClick: () -> Unit = {}
+) {
+    val status = if (name.contains("Alien", ignoreCase = true)) {
+        "Alien"
+    } else {
+        "Humano"
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .clickable { onPersonaClick() },
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Image(
+            painter = painterResource(id = imageRes),
+            contentDescription = "Character image",
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape),
+            contentScale = ContentScale.Crop
+        )
+
+        Column {
+            Text(text = name, style = MaterialTheme.typography.titleMedium)
+            Text(text = status, style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}
+
+// Lista de personajes
+val Personas = listOf(
+    "Rick Sanchez",
+    "Morty Smith",
+    "Summer Smith",
+    "Beth Smith",
+    "Jerry Smith",
+    "Abadango Alien"
+)
+
+fun getPersonaDetails(name: String): Triple<String, String, String> {
+    return when (name) {
+        "Rick Sanchez" -> Triple("Human", "Alive", "Male")
+        "Morty Smith" -> Triple("Human", "Alive", "Male")
+        "Summer Smith" -> Triple("Human", "Alive", "Female")
+        "Beth Smith" -> Triple("Human", "Alive", "Female")
+        "Jerry Smith" -> Triple("Human", "Alive", "Male")
+        "Abadango Alien" -> Triple("Alien", "Alive", "Unknown")
+        else -> Triple("Human", "Alive", "Male")
+    }
+}
+
+//----------------------------
+@Composable
+fun Perfil(modifier: Modifier = Modifier, personaName: String) {
+    val (species, status, gender) = getPersonaDetails(personaName)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            painter = painterResource(id = getImageForPersona(personaName)),
+            contentDescription = "Character Image",
+            modifier = Modifier
+                .size(120.dp)
+                .clip(CircleShape),
+            contentScale = ContentScale.Crop
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Nombre
+        Text(
+            text = personaName,
+            style = MaterialTheme.typography.titleMedium,
+            fontSize = 20.sp
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            DetailRow(label = "Species:", value = species)
+            DetailRow(label = "Status:", value = status)
+            DetailRow(label = "Gender:", value = gender)
+        }
+    }
+}
+
+@Composable
+fun DetailRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+        Text(text = value, style = MaterialTheme.typography.bodyMedium)
+    }
+}
